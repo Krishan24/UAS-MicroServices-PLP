@@ -16,13 +16,20 @@ import com.cg.uas.programoffered.dao.IProgramRepository;
 import com.cg.uas.programoffered.dto.Program;
 import com.cg.uas.programoffered.exception.ProgramAlreadyExistsException;
 import com.cg.uas.programoffered.exception.ProgramNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 
 @Service
 public class ProgramServiceImpl implements IProgramService {
 	
 	@Autowired
 	private IProgramRepository repo;
-
+	
+	String loggerMsg = "Sorry for the inconvinience, currently database is down";
+	
+   Logger logger=LoggerFactory.getLogger(ProgramServiceImpl.class);
 
 	/****************************************************************************************************************************
 	 - Method Name      : getAllPrograms
@@ -47,7 +54,8 @@ public class ProgramServiceImpl implements IProgramService {
 	  ****************************************************************************************************************************/ 
 	@Override
 	public Program getProgramById(int id) throws ProgramNotFoundException {
-		return repo.findById(id).orElseThrow(() -> new ProgramNotFoundException());
+		return repo.findById(id).orElseThrow(() ->
+		new ProgramNotFoundException());
 	}
 
 	/****************************************************************************************************************************
@@ -61,7 +69,11 @@ public class ProgramServiceImpl implements IProgramService {
 	@Override
 	public Program addProgram(Program program) throws ProgramAlreadyExistsException {
 		if (repo.existsById(program.getProgramid()))
+		{
+			
+			logger.error(loggerMsg);
 			throw new ProgramAlreadyExistsException();
+		}
 		else
 			return repo.saveAndFlush(program);
 	}
@@ -76,7 +88,10 @@ public class ProgramServiceImpl implements IProgramService {
 	@Override
 	public Program updateProgram(Program program) throws ProgramNotFoundException {
 		if (!repo.existsById(program.getProgramid()))
+		{
+			logger.error(loggerMsg);
 			throw new ProgramNotFoundException();
+		}
 		else
 			return repo.save(program);
 	}
@@ -97,6 +112,7 @@ public class ProgramServiceImpl implements IProgramService {
 			repo.deleteById(id);
 			return "Deleted Successfully";
 		} else {
+			logger.error(loggerMsg);
 			throw new ProgramNotFoundException();
 		}
 	}
